@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Citibike NYC Route Heatmap</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- App CSS -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Control panel -->
+  <div id="control-panel">
+    <h2>Citibike Heatmap</h2>
+
+    <!-- Metadata summary -->
+    <div id="metadata-bar">Loading data…</div>
+
+    <!-- Popularity threshold slider -->
+    <div class="control-group">
+      <label for="popularity-slider">
+        Popularity: <span id="popularity-label">—</span>
+      </label>
+      <input
+        id="popularity-slider"
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value="0"
+      />
+    </div>
+
+    <!-- Color mode -->
+    <div class="control-group">
+      <div class="control-label">Color routes by</div>
+      <label class="toggle-label">
+        <input type="radio" name="color-mode" value="volume" checked />
+        Trip volume
+      </label>
+      <label class="toggle-label">
+        <input type="radio" name="color-mode" value="electric" />
+        E-bike share
+      </label>
+      <label class="toggle-label">
+        <input type="radio" name="color-mode" value="member" />
+        Member share
+      </label>
+    </div>
+
+    <!-- Layer toggles -->
+    <div class="control-group">
+      <label class="toggle-label">
+        <input id="toggle-routes" type="checkbox" checked />
+        O-D Routes
+      </label>
+      <label class="toggle-label">
+        <input id="toggle-heatmap" type="checkbox" checked />
+        Station Heatmap
+      </label>
+      <label class="toggle-label">
+        <input id="toggle-subway" type="checkbox" />
+        Subway Map
+      </label>
+    </div>
+
+    <!-- Legend -->
+    <div id="legend">
+      <div class="legend-title" id="legend-title">Trip volume</div>
+      <div class="legend-gradient"></div>
+      <div class="legend-labels">
+        <span id="legend-low">Low</span><span id="legend-high">High</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification area -->
+  <div id="toast-area"></div>
+
+  <!-- Scripts -->
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet.heat -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <!-- App JS -->
+  <script src="/static/js/map.js"></script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+/* ============================================================
+   Global reset + body
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #111;
+  color: #eee;
+}
+
+/* ============================================================
+   Map
+   ============================================================ */
+#map {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ============================================================
+   Control panel
+   ============================================================ */
+#control-panel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  width: 260px;
+  background: rgba(20, 20, 30, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 16px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+#control-panel h2 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+/* Metadata bar */
+#metadata-bar {
+  font-size: 11px;
+  color: #aaa;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+/* Control groups */
+.control-group {
+  margin-bottom: 14px;
+}
+
+.control-group label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #ccc;
+}
+
+/* Slider */
+input[type="range"] {
+  width: 100%;
+  accent-color: #4fc3f7;
+  cursor: pointer;
+}
+
+/* Control group sub-label */
+.control-label {
+  font-size: 12px;
+  color: #ccc;
+  margin-bottom: 6px;
+}
+
+/* Toggle checkboxes */
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ddd;
+  cursor: pointer;
+  margin-bottom: 6px;
+  user-select: none;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #4fc3f7;
+  cursor: pointer;
+}
+
+.toggle-label input[type="checkbox"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Legend
+   ============================================================ */
+#legend {
+  margin-top: 6px;
+}
+
+.legend-title {
+  font-size: 11px;
+  color: #aaa;
+  margin-bottom: 5px;
+}
+
+.legend-gradient {
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    #3182bd,
+    #fec44f,
+    #de2d26
+  );
+  margin-bottom: 4px;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #888;
+}
+
+/* ============================================================
+   Toast notifications
+   ============================================================ */
+#toast-area {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(30, 30, 40, 0.95);
+  color: #eee;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 13px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  border-left: 4px solid #4fc3f7;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  max-width: 380px;
+  text-align: center;
+}
+
+.toast.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.toast-success {
+  border-left-color: #66bb6a;
+}
+
+.toast.toast-error {
+  border-left-color: #ef5350;
+}
+
+/* ============================================================
+   Leaflet popup override for dark theme
+   ============================================================ */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: rgba(20, 20, 30, 0.95);
+  color: #eee;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.leaflet-popup-content {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.leaflet-popup-close-button {
+  color: #aaa !important;
+}
+
+/* ============================================================
+   Responsive — hide panel on very small screens
+   ============================================================ */
+@media (max-width: 480px) {
+  #control-panel {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+}

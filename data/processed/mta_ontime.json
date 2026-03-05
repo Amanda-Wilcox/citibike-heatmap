@@ -1,0 +1,245 @@
+[
+  {
+    "line": "S 42nd",
+    "months_of_data": 17,
+    "weekday_otp": 0.9974,
+    "weekend_otp": 0.9974,
+    "overall_otp": 0.9974,
+    "total_trips_scheduled": 246216,
+    "total_trips_on_time": 245584
+  },
+  {
+    "line": "GS",
+    "months_of_data": 52,
+    "weekday_otp": 0.9943,
+    "weekend_otp": 0.9951,
+    "overall_otp": 0.9945,
+    "total_trips_scheduled": 706797,
+    "total_trips_on_time": 702897
+  },
+  {
+    "line": "S Fkln",
+    "months_of_data": 17,
+    "weekday_otp": 0.9929,
+    "weekend_otp": 0.996,
+    "overall_otp": 0.9938,
+    "total_trips_scheduled": 120626,
+    "total_trips_on_time": 119879
+  },
+  {
+    "line": "FS",
+    "months_of_data": 56,
+    "weekday_otp": 0.9933,
+    "weekend_otp": 0.9916,
+    "overall_otp": 0.9928,
+    "total_trips_scheduled": 380361,
+    "total_trips_on_time": 377633
+  },
+  {
+    "line": "H",
+    "months_of_data": 56,
+    "weekday_otp": 0.9666,
+    "weekend_otp": 0.9621,
+    "overall_otp": 0.9654,
+    "total_trips_scheduled": 264500,
+    "total_trips_on_time": 255344
+  },
+  {
+    "line": "S Rock",
+    "months_of_data": 17,
+    "weekday_otp": 0.957,
+    "weekend_otp": 0.9511,
+    "overall_otp": 0.9555,
+    "total_trips_scheduled": 80878,
+    "total_trips_on_time": 77279
+  },
+  {
+    "line": "L",
+    "months_of_data": 73,
+    "weekday_otp": 0.9166,
+    "weekend_otp": 0.9337,
+    "overall_otp": 0.921,
+    "total_trips_scheduled": 1094309,
+    "total_trips_on_time": 1007886
+  },
+  {
+    "line": "7",
+    "months_of_data": 73,
+    "weekday_otp": 0.912,
+    "weekend_otp": 0.9117,
+    "overall_otp": 0.9119,
+    "total_trips_scheduled": 1213200,
+    "total_trips_on_time": 1106316
+  },
+  {
+    "line": "JZ",
+    "months_of_data": 17,
+    "weekday_otp": 0.8805,
+    "weekend_otp": 0.9104,
+    "overall_otp": 0.8885,
+    "total_trips_scheduled": 144807,
+    "total_trips_on_time": 128662
+  },
+  {
+    "line": "J",
+    "months_of_data": 56,
+    "weekday_otp": 0.8761,
+    "weekend_otp": 0.8793,
+    "overall_otp": 0.877,
+    "total_trips_scheduled": 443864,
+    "total_trips_on_time": 389248
+  },
+  {
+    "line": "M",
+    "months_of_data": 73,
+    "weekday_otp": 0.8444,
+    "weekend_otp": 0.9515,
+    "overall_otp": 0.8726,
+    "total_trips_scheduled": 563298,
+    "total_trips_on_time": 491544
+  },
+  {
+    "line": "G",
+    "months_of_data": 73,
+    "weekday_otp": 0.8591,
+    "weekend_otp": 0.9044,
+    "overall_otp": 0.8717,
+    "total_trips_scheduled": 608902,
+    "total_trips_on_time": 530771
+  },
+  {
+    "line": "1",
+    "months_of_data": 73,
+    "weekday_otp": 0.8414,
+    "weekend_otp": 0.8934,
+    "overall_otp": 0.8534,
+    "total_trips_scheduled": 909768,
+    "total_trips_on_time": 776425
+  },
+  {
+    "line": "3",
+    "months_of_data": 73,
+    "weekday_otp": 0.8587,
+    "weekend_otp": 0.7737,
+    "overall_otp": 0.8395,
+    "total_trips_scheduled": 573502,
+    "total_trips_on_time": 481462
+  },
+  {
+    "line": "5",
+    "months_of_data": 73,
+    "weekday_otp": 0.8286,
+    "weekend_otp": 0.8761,
+    "overall_otp": 0.8384,
+    "total_trips_scheduled": 620870,
+    "total_trips_on_time": 520566
+  },
+  {
+    "line": "6",
+    "months_of_data": 73,
+    "weekday_otp": 0.8259,
+    "weekend_otp": 0.8299,
+    "overall_otp": 0.8267,
+    "total_trips_scheduled": 1042552,
+    "total_trips_on_time": 861836
+  },
+  {
+    "line": "4",
+    "months_of_data": 73,
+    "weekday_otp": 0.8348,
+    "weekend_otp": 0.7789,
+    "overall_otp": 0.821,
+    "total_trips_scheduled": 752027,
+    "total_trips_on_time": 617427
+  },
+  {
+    "line": "R",
+    "months_of_data": 73,
+    "weekday_otp": 0.8008,
+    "weekend_otp": 0.8475,
+    "overall_otp": 0.8124,
+    "total_trips_scheduled": 582272,
+    "total_trips_on_time": 473062
+  },
+  {
+    "line": "Q",
+    "months_of_data": 73,
+    "weekday_otp": 0.7889,
+    "weekend_otp": 0.8161,
+    "overall_otp": 0.7965,
+    "total_trips_scheduled": 674782,
+    "total_trips_on_time": 537467
+  },
+  {
+    "line": "E",
+    "months_of_data": 73,
+    "weekday_otp": 0.7703,
+    "weekend_otp": 0.8338,
+    "overall_otp": 0.7823,
+    "total_trips_scheduled": 757422,
+    "total_trips_on_time": 592542
+  },
+  {
+    "line": "D",
+    "months_of_data": 73,
+    "weekday_otp": 0.7593,
+    "weekend_otp": 0.8018,
+    "overall_otp": 0.7705,
+    "total_trips_scheduled": 582133,
+    "total_trips_on_time": 448549
+  },
+  {
+    "line": "N",
+    "months_of_data": 73,
+    "weekday_otp": 0.7619,
+    "weekend_otp": 0.7147,
+    "overall_otp": 0.753,
+    "total_trips_scheduled": 850216,
+    "total_trips_on_time": 640226
+  },
+  {
+    "line": "A",
+    "months_of_data": 73,
+    "weekday_otp": 0.7564,
+    "weekend_otp": 0.7419,
+    "overall_otp": 0.7527,
+    "total_trips_scheduled": 767382,
+    "total_trips_on_time": 577595
+  },
+  {
+    "line": "2",
+    "months_of_data": 73,
+    "weekday_otp": 0.768,
+    "weekend_otp": 0.67,
+    "overall_otp": 0.7436,
+    "total_trips_scheduled": 665961,
+    "total_trips_on_time": 495235
+  },
+  {
+    "line": "C",
+    "months_of_data": 72,
+    "weekday_otp": 0.7543,
+    "weekend_otp": 0.7101,
+    "overall_otp": 0.7431,
+    "total_trips_scheduled": 405189,
+    "total_trips_on_time": 301106
+  },
+  {
+    "line": "F",
+    "months_of_data": 73,
+    "weekday_otp": 0.7306,
+    "weekend_otp": 0.7589,
+    "overall_otp": 0.7362,
+    "total_trips_scheduled": 712766,
+    "total_trips_on_time": 524751
+  },
+  {
+    "line": "B",
+    "months_of_data": 71,
+    "weekday_otp": 0.7237,
+    "weekend_otp": null,
+    "overall_otp": 0.7237,
+    "total_trips_scheduled": 294618,
+    "total_trips_on_time": 213215
+  }
+]
