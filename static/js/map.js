@@ -141,24 +141,42 @@ function interpolateColor(norm) {
   return `rgb(${r},${g},${b})`;
 }
 
-/** Return the display color for a route based on the current color mode. */
-function getRouteColor(route) {
-  if (state.colorMode === "electric") return interpolateColor(route.electric_pct ?? 0);
-  if (state.colorMode === "member")   return interpolateColor(route.member_pct   ?? 0);
-  return route.color; // volume — pre-computed by scraper
+/**
+ * Diverging color scale for deviation mode.
+ * norm in [-1, 1]: -1 = well below baseline (blue), 0 = as expected (gray), 1 = well above (red).
+ */
+function divergingColor(norm) {
+  if (norm <= 0) {
+    const t = -norm;
+    return `rgb(${Math.round(99 + t * (33 - 99))},${Math.round(99 + t * (102 - 99))},${Math.round(99 + t * (172 - 99))})`;
+  } else {
+    const t = norm;
+    return `rgb(${Math.round(99 + t * (215 - 99))},${Math.round(99 + t * (48 - 99))},${Math.round(99 + t * (39 - 99))})`;
+  }
 }
 
 const LEGEND_LABELS = {
-  volume:   { title: "Trip volume",   low: "Low",     high: "High" },
-  electric: { title: "E-bike share",  low: "0%",      high: "100%" },
-  member:   { title: "Member share",  low: "0%",      high: "100%" },
+  volume:   { title: "Trip volume",   low: "Low",    high: "High",   gradient: "linear-gradient(to right, #3182bd, #fec44f, #de2d26)" },
+  electric: { title: "E-bike share",  low: "0%",     high: "100%",   gradient: "linear-gradient(to right, #3182bd, #fec44f, #de2d26)" },
+  member:   { title: "Member share",  low: "0%",     high: "100%",   gradient: "linear-gradient(to right, #3182bd, #fec44f, #de2d26)" },
 };
 
 function updateLegend() {
-  const { title, low, high } = LEGEND_LABELS[state.colorMode];
-  document.getElementById("legend-title").textContent = title;
-  document.getElementById("legend-low").textContent   = low;
-  document.getElementById("legend-high").textContent  = high;
+  const isFiltered = state.hourRange[0] > 0 || state.hourRange[1] < 23 || state.selectedMonths.size < 12;
+  const deviation = state.colorMode === "volume" && isFiltered;
+  const grad = document.querySelector(".legend-gradient");
+  if (deviation) {
+    document.getElementById("legend-title").textContent = "vs. baseline";
+    document.getElementById("legend-low").textContent   = "Below";
+    document.getElementById("legend-high").textContent  = "Above";
+    grad.style.background = "linear-gradient(to right, #2166ac, #636363, #d73027)";
+  } else {
+    const { title, low, high, gradient } = LEGEND_LABELS[state.colorMode];
+    document.getElementById("legend-title").textContent = title;
+    document.getElementById("legend-low").textContent   = low;
+    document.getElementById("legend-high").textContent  = high;
+    grad.style.background = gradient;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -187,6 +205,30 @@ function filteredCount(route) {
   const monthSel = [...state.selectedMonths].reduce((s, m) => s + (route.by_month[m] || 0), 0);
   const monthFrac = monthTotal > 0 ? monthSel / monthTotal : 1;
   return Math.round(route.count * hourFrac * monthFrac);
+}
+
+/**
+ * Deviation ratio: how much busier/quieter this route is in the selected window
+ * compared to what you'd expect if trips were uniformly distributed.
+ * ratio > 1 → above baseline, ratio < 1 → below baseline.
+ */
+function deviationRatio(route) {
+  if (!route.by_hour) return 1;
+  const [h1, h2] = state.hourRange;
+  const hoursSelected = h2 - h1 + 1;
+  const hourTotal = route.by_hour.reduce((a, b) => a + b, 0);
+  let hourSel = 0;
+  for (let h = h1; h <= h2; h++) hourSel += route.by_hour[h] || 0;
+  const hourFrac = hourTotal > 0 ? hourSel / hourTotal : hoursSelected / 24;
+  const hourRatio = hourFrac / (hoursSelected / 24);
+
+  const monthsSelected = state.selectedMonths.size;
+  const monthTotal = route.by_month.reduce((a, b) => a + b, 0);
+  const monthSel = [...state.selectedMonths].reduce((s, m) => s + (route.by_month[m] || 0), 0);
+  const monthFrac = monthTotal > 0 ? monthSel / monthTotal : monthsSelected / 12;
+  const monthRatio = monthFrac / (monthsSelected / 12);
+
+  return hourRatio * monthRatio;
 }
 
 /**
@@ -222,23 +264,35 @@ function bezierArc(lat1, lng1, lat2, lng2, steps = 24) {
  */
 function renderRoutes() {
   state.routeLayer.clearLayers();
+  updateLegend();
 
   const renderer = L.canvas();
   const isFiltered = state.hourRange[0] > 0 || state.hourRange[1] < 23 || state.selectedMonths.size < 12;
+  const useDeviation = isFiltered && state.colorMode === "volume";
+
   // When filtered, hide routes with no trips in the selected window
   const routes = isFiltered
     ? state.allRoutes.filter((r) => filteredCount(r) > 0)
     : state.allRoutes;
 
-  // Compute filtered counts and log-normalize for volume color mode
-  const fcounts = routes.map((r) => filteredCount(r));
-  let logMin = 0, logRange = 1;
-  if (routes.length > 0) {
+  // Precompute per-route color values
+  let colorNorms;
+  if (useDeviation) {
+    // Log-deviation relative to uniform baseline, normalized to [-1, 1] across visible routes
+    const logDevs = routes.map((r) => Math.log(Math.max(deviationRatio(r), 0.001)));
+    const maxAbs = Math.max(...logDevs.map(Math.abs), 0.001);
+    colorNorms = logDevs.map((d) => d / maxAbs);
+  } else if (state.colorMode === "volume") {
+    // Absolute log-normalized filtered counts
+    const fcounts = routes.map((r) => filteredCount(r));
     const logVals = fcounts.map((c) => Math.log1p(c));
-    logMin = Math.min(...logVals);
-    const logMax = Math.max(...logVals);
-    logRange = Math.max(logMax - logMin, 1);
+    const logMin = routes.length > 0 ? Math.min(...logVals) : 0;
+    const logMax = routes.length > 0 ? Math.max(...logVals) : 1;
+    const logRange = Math.max(logMax - logMin, 1);
+    colorNorms = logVals.map((v) => (v - logMin) / logRange);
   }
+
+  const fcounts = routes.map((r) => filteredCount(r));
 
   routes.forEach((route, i) => {
     const latlngs = bezierArc(
@@ -251,9 +305,10 @@ function renderRoutes() {
       color = interpolateColor(route.electric_pct ?? 0);
     } else if (state.colorMode === "member") {
       color = interpolateColor(route.member_pct ?? 0);
+    } else if (useDeviation) {
+      color = divergingColor(colorNorms[i]);
     } else {
-      const norm = routes.length > 1 ? (Math.log1p(fcounts[i]) - logMin) / logRange : 0.5;
-      color = interpolateColor(norm);
+      color = interpolateColor(routes.length > 1 ? colorNorms[i] : 0.5);
     }
 
     const line = L.polyline(latlngs, {

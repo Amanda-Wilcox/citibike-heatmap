@@ -216,13 +216,9 @@ input[type="range"] {
 .legend-gradient {
   height: 10px;
   border-radius: 4px;
-  background: linear-gradient(
-    to right,
-    #3182bd,
-    #fec44f,
-    #de2d26
-  );
+  background: linear-gradient(to right, #3182bd, #fec44f, #de2d26);
   margin-bottom: 4px;
+  transition: background 0.3s ease;
 }
 
 .legend-labels {
