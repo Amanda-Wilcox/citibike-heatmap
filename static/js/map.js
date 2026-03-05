@@ -34,6 +34,8 @@ const state = {
   subwayLoading: false,
   colorMode: "volume", // "volume" | "electric" | "member"
   map: null,
+  hourRange: [0, 23],
+  selectedMonths: new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
 };
 
 // ---------------------------------------------------------------------------
@@ -159,6 +161,34 @@ function updateLegend() {
   document.getElementById("legend-high").textContent  = high;
 }
 
+// ---------------------------------------------------------------------------
+// Time filter helpers
+// ---------------------------------------------------------------------------
+
+function formatHour(h) {
+  if (h === 0) return "12am";
+  if (h === 12) return "12pm";
+  return h < 12 ? `${h}am` : `${h - 12}pm`;
+}
+
+/**
+ * Approximate filtered trip count for a route given the current hour/month selection.
+ * Uses independent fractions (no cross-tab data available), multiplied together.
+ */
+function filteredCount(route) {
+  if (!route.by_hour) return route.count;
+  const [h1, h2] = state.hourRange;
+  const hourTotal = route.by_hour.reduce((a, b) => a + b, 0);
+  let hourSel = 0;
+  for (let h = h1; h <= h2; h++) hourSel += route.by_hour[h] || 0;
+  const hourFrac = hourTotal > 0 ? hourSel / hourTotal : 1;
+
+  const monthTotal = route.by_month.reduce((a, b) => a + b, 0);
+  const monthSel = [...state.selectedMonths].reduce((s, m) => s + (route.by_month[m] || 0), 0);
+  const monthFrac = monthTotal > 0 ? monthSel / monthTotal : 1;
+  return Math.round(route.count * hourFrac * monthFrac);
+}
+
 /**
  * Sample N points along a quadratic bezier curve.
  * Control point is offset perpendicularly from the midpoint,
@@ -186,24 +216,48 @@ function bezierArc(lat1, lng1, lat2, lng2, steps = 24) {
 }
 
 /**
- * Render O-D routes as curved arcs, colored and weighted by trip volume.
- * Slider left = least popular only; slider right = all routes.
- * @param {number} maxTrips - show routes with count <= this value
+ * Render O-D routes as curved arcs, colored by trip volume (or e-bike/member share).
+ * When time filters are active, colors re-normalize to filtered counts.
+ * Routes with zero filtered trips are hidden.
  */
-function renderRoutes(maxTrips) {
+function renderRoutes() {
   state.routeLayer.clearLayers();
 
   const renderer = L.canvas();
-  const routes = state.allRoutes.filter((r) => r.count <= maxTrips);
+  const isFiltered = state.hourRange[0] > 0 || state.hourRange[1] < 23 || state.selectedMonths.size < 12;
+  // When filtered, hide routes with no trips in the selected window
+  const routes = isFiltered
+    ? state.allRoutes.filter((r) => filteredCount(r) > 0)
+    : state.allRoutes;
 
-  routes.forEach((route) => {
+  // Compute filtered counts and log-normalize for volume color mode
+  const fcounts = routes.map((r) => filteredCount(r));
+  let logMin = 0, logRange = 1;
+  if (routes.length > 0) {
+    const logVals = fcounts.map((c) => Math.log1p(c));
+    logMin = Math.min(...logVals);
+    const logMax = Math.max(...logVals);
+    logRange = Math.max(logMax - logMin, 1);
+  }
+
+  routes.forEach((route, i) => {
     const latlngs = bezierArc(
       route.start_lat, route.start_lng,
       route.end_lat, route.end_lng
     );
 
+    let color;
+    if (state.colorMode === "electric") {
+      color = interpolateColor(route.electric_pct ?? 0);
+    } else if (state.colorMode === "member") {
+      color = interpolateColor(route.member_pct ?? 0);
+    } else {
+      const norm = routes.length > 1 ? (Math.log1p(fcounts[i]) - logMin) / logRange : 0.5;
+      color = interpolateColor(norm);
+    }
+
     const line = L.polyline(latlngs, {
-      color: getRouteColor(route),
+      color,
       weight: 2,
       opacity: 0.65,
       renderer,
@@ -216,9 +270,13 @@ function renderRoutes(maxTrips) {
       this.setStyle({ opacity: 0.65, weight: 2 });
     });
 
+    const fc = fcounts[i];
+    const tripInfo = isFiltered
+      ? `Filtered trips: <strong>${fc.toLocaleString()}</strong><br/>Total: ${route.count.toLocaleString()}`
+      : `Trips: <strong>${route.count.toLocaleString()}</strong>`;
+
     line.bindPopup(
-      `<strong>${route.start_name}</strong> → <strong>${route.end_name}</strong><br/>
-       Trips: <strong>${route.count.toLocaleString()}</strong>`,
+      `<strong>${route.start_name}</strong> → <strong>${route.end_name}</strong><br/>${tripInfo}`,
       { maxWidth: 260 }
     );
 
@@ -308,30 +366,62 @@ function showToast(message, type = "info") {
 // Controls
 // ---------------------------------------------------------------------------
 
-/**
- * Configure the popularity slider range from loaded route data and wire up its event.
- */
-function initPopularitySlider() {
-  const slider = document.getElementById("popularity-slider");
-  const label = document.getElementById("popularity-label");
 
-  const minCount = state.allRoutes[state.allRoutes.length - 1].count;
-  const maxCount = state.allRoutes[0].count;
+function initTimeFilters() {
+  const hourMin = document.getElementById("hour-min");
+  const hourMax = document.getElementById("hour-max");
+  const hourLabel = document.getElementById("hour-label");
+  const hourFill = document.getElementById("hour-fill");
 
-  slider.min = minCount;
-  slider.max = maxCount;
-  slider.value = maxCount;
-  slider.step = Math.max(1, Math.round((maxCount - minCount) / 100));
-  label.textContent = "Most";
+  function updateHourFill() {
+    const left = (state.hourRange[0] / 23) * 100;
+    const right = ((23 - state.hourRange[1]) / 23) * 100;
+    hourFill.style.left = left + "%";
+    hourFill.style.right = right + "%";
+  }
 
-  slider.addEventListener("input", () => {
-    const threshold = parseInt(slider.value, 10);
-    label.textContent =
-      threshold === parseInt(slider.max) ? "Most" :
-      threshold === parseInt(slider.min) ? "Least" :
-      threshold.toLocaleString() + " trips";
-    renderRoutes(threshold);
+  function updateHourLabel() {
+    const [h1, h2] = state.hourRange;
+    hourLabel.textContent = (h1 === 0 && h2 === 23)
+      ? "All day"
+      : `${formatHour(h1)} – ${formatHour(h2)}`;
+  }
+
+  hourMin.addEventListener("input", () => {
+    let v = parseInt(hourMin.value, 10);
+    if (v > state.hourRange[1]) { v = state.hourRange[1]; hourMin.value = v; }
+    state.hourRange[0] = v;
+    updateHourFill();
+    updateHourLabel();
+    renderRoutes();
   });
+
+  hourMax.addEventListener("input", () => {
+    let v = parseInt(hourMax.value, 10);
+    if (v < state.hourRange[0]) { v = state.hourRange[0]; hourMax.value = v; }
+    state.hourRange[1] = v;
+    updateHourFill();
+    updateHourLabel();
+    renderRoutes();
+  });
+
+  document.querySelectorAll(".month-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const m = parseInt(btn.dataset.month, 10);
+      if (state.selectedMonths.has(m)) {
+        if (state.selectedMonths.size > 1) {
+          state.selectedMonths.delete(m);
+          btn.classList.remove("active");
+        }
+      } else {
+        state.selectedMonths.add(m);
+        btn.classList.add("active");
+      }
+      renderRoutes();
+    });
+  });
+
+  updateHourFill();
 }
 
 function initControls() {
@@ -341,8 +431,7 @@ function initControls() {
     radio.addEventListener("change", (e) => {
       state.colorMode = e.target.value;
       updateLegend();
-      const threshold = parseInt(document.getElementById("popularity-slider").value, 10);
-      renderRoutes(threshold);
+      renderRoutes();
     });
   });
 
@@ -412,6 +501,7 @@ function initControls() {
 async function init() {
   initMap();
   initControls();
+  initTimeFilters();
 
   try {
     const [routes, stations, meta] = await Promise.all([
@@ -425,8 +515,7 @@ async function init() {
 
     renderHeatmap(stations);
 
-    initPopularitySlider();
-    renderRoutes(state.allRoutes[0].count);
+    renderRoutes();
   } catch (err) {
     console.error("Init failed:", err);
     showToast(

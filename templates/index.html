@@ -22,19 +22,36 @@
     <!-- Metadata summary -->
     <div id="metadata-bar">Loading data…</div>
 
-    <!-- Popularity threshold slider -->
+    <!-- Hour range slider -->
     <div class="control-group">
-      <label for="popularity-slider">
-        Popularity: <span id="popularity-label">—</span>
-      </label>
-      <input
-        id="popularity-slider"
-        type="range"
-        min="0"
-        max="100"
-        step="1"
-        value="0"
-      />
+      <div class="control-label">Time of day: <span id="hour-label">All day</span></div>
+      <div class="dual-range" id="hour-range">
+        <div class="dual-range-track"><div class="dual-range-fill" id="hour-fill"></div></div>
+        <input type="range" id="hour-min" min="0" max="23" value="0" step="1" />
+        <input type="range" id="hour-max" min="0" max="23" value="23" step="1" />
+      </div>
+      <div class="dual-range-labels">
+        <span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span>
+      </div>
+    </div>
+
+    <!-- Month pills -->
+    <div class="control-group">
+      <div class="control-label">Month</div>
+      <div class="month-pills" id="month-pills">
+        <button class="month-pill active" data-month="0">Jan</button>
+        <button class="month-pill active" data-month="1">Feb</button>
+        <button class="month-pill active" data-month="2">Mar</button>
+        <button class="month-pill active" data-month="3">Apr</button>
+        <button class="month-pill active" data-month="4">May</button>
+        <button class="month-pill active" data-month="5">Jun</button>
+        <button class="month-pill active" data-month="6">Jul</button>
+        <button class="month-pill active" data-month="7">Aug</button>
+        <button class="month-pill active" data-month="8">Sep</button>
+        <button class="month-pill active" data-month="9">Oct</button>
+        <button class="month-pill active" data-month="10">Nov</button>
+        <button class="month-pill active" data-month="11">Dec</button>
+      </div>
     </div>
 
     <!-- Color mode -->

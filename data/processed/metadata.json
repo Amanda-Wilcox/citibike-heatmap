@@ -1,6 +1,7 @@
 {
-  "months_processed": 60,
+  "months_processed": 25,
   "files": [
+    "202602-citibike-tripdata.zip",
     "202601-citibike-tripdata.zip",
     "202512-citibike-tripdata.zip",
     "202511-citibike-tripdata.zip",
@@ -24,11 +25,10 @@
     "202405-citibike-tripdata.zip",
     "202404-citibike-tripdata.zip",
     "202403-citibike-tripdata.zip",
-    "202402-citibike-tripdata.zip",
-    "202401-citibike-tripdata.zip"
+    "202402-citibike-tripdata.zip"
   ],
-  "total_trips": 89683572,
+  "total_trips": 89027659,
   "od_pairs_count": 1000,
-  "stations_count": 2504,
-  "generated_at": "2026-03-02T01:39:19.707465+00:00"
+  "stations_count": 2501,
+  "generated_at": "2026-03-05T02:15:58.636295+00:00"
 }

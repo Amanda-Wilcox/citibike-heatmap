@@ -159,7 +159,7 @@ def normalise_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df.rename(columns=rename_map)
 
 
-OPTIONAL_COLS = {"rideable_type", "member_casual"}
+OPTIONAL_COLS = {"rideable_type", "member_casual", "started_at"}
 
 def usecols_filter(col: str) -> bool:
     """Keep only columns we actually need (modern or legacy names)."""
@@ -238,6 +238,15 @@ def stream_and_aggregate(
                                 counts["member"] += 1
                             else:
                                 counts["casual"] += 1
+
+                            started = getattr(row, "started_at", None)
+                            if started:
+                                try:
+                                    ts = pd.Timestamp(started)
+                                    counts["by_hour"][ts.hour] += 1
+                                    counts["by_month"][ts.month - 1] += 1  # Jan=0
+                                except Exception:
+                                    pass
 
                             # Store station metadata (lat/lng/name)
                             if sid not in station_info:
@@ -344,6 +353,8 @@ def build_od_json(
             "member_pct": round(member / total, 4) if total else 0,
             "color": count_to_color(norm),
             "weight": round(count_to_weight(norm), 2),
+            "by_hour": counts["by_hour"],
+            "by_month": counts["by_month"],
         })
 
     return result
@@ -400,7 +411,11 @@ def main(months: int, keep_raw: bool) -> None:
     gbfs_stations = fetch_gbfs_stations()
     print(f"  {len(gbfs_stations)} stations loaded from GBFS.")
 
-    od_counts: defaultdict = defaultdict(lambda: defaultdict(int))
+    def _new_counts():
+        return {"total": 0, "electric": 0, "classic": 0, "member": 0, "casual": 0,
+                "by_hour": [0] * 24, "by_month": [0] * 12}
+
+    od_counts: defaultdict = defaultdict(_new_counts)
     station_info: dict = {}
     station_trip_counts: defaultdict = defaultdict(int)
 
